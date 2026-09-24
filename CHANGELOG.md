@@ -1,0 +1,10 @@
+# Changelog
+
+## 1.0.0 - 2026-09-24
+
+- Crea el microservicio `csv-results-persistence`.
+- Consume mensajes Avro `MatchResultKey` / `MatchResultValue` desde `results.parsed`.
+- Persiste los resultados con Spring Data JPA en PostgreSQL.
+- Crea la tabla `results` mediante Flyway y usa `match_id` como clave primaria para soportar reentregas idempotentes.
+- Añade tests unitarios y una prueba de integración PostgreSQL con Testcontainers.
+- Añade CI con JDK 21 para `mvn -B verify -Pintegration`.
