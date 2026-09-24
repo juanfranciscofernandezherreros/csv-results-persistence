@@ -1,4 +1,4 @@
-Current version: **1.0.0**
+Current version: **1.0.1**
 
 # csv-results-persistence
 
@@ -86,3 +86,6 @@ El offset Kafka solo se confirma normalmente después de que el listener termine
 ## Arquitectura
 
 Ver [docs/diagrams.md](docs/diagrams.md).
+
+
+Las ramas de pull requests mergeadas se eliminan automáticamente para mantener `main` como rama estable.
