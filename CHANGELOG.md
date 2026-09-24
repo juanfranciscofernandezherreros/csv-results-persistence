@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.1 - 2026-09-24
+
+- Añade limpieza automática de ramas de pull requests mergeadas y elimina la rama histórica residual.
+- Actualiza la versión de `1.0.0` a `1.0.1`.
+
 ## 1.0.0 - 2026-09-24
 
 - Crea el microservicio `csv-results-persistence`.

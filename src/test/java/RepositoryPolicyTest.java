@@ -20,7 +20,7 @@ class RepositoryPolicyTest {
         assertTrue(pom.contains("kafka-avro-serializer"));
         assertTrue(config.contains("${KAFKA_PARSED_RESULTS_TOPIC:results.parsed}"));
         assertTrue(migration.contains("CREATE TABLE results"));
-        assertTrue(readme.contains("Current version: **1.0.0**"));
+        assertTrue(readme.contains("Current version: **1.0.1**"));
         assertTrue(readme.contains("results.parsed"));
     }
 }
