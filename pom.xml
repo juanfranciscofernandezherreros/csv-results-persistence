@@ -12,10 +12,13 @@
 
   <groupId>com.fernandez</groupId>
   <artifactId>csv-results-persistence</artifactId>
-  <version>1.0.1</version>
+  <version>${revision}${sha1}${changelist}</version>
   <name>csv-results-persistence</name>
 
   <properties>
+    <revision>1.0.1</revision>
+    <sha1></sha1>
+    <changelist></changelist>
     <java.version>21</java.version>
     <avro.version>1.11.1</avro.version>
     <confluent.version>7.5.0</confluent.version>
