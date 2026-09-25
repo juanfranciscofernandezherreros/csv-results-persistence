@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.6 - 2026-09-25
+
+- [patch] Refuerza AGENTS.md con lectura obligatoria por tarea, autonomía y prohibición absoluta de escrituras directas en main.
+
 ## 1.0.5
 
 - [patch] Estandariza la automatización del repositorio con el flujo autónomo de csv-results-parser.
