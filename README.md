@@ -1,4 +1,4 @@
-![version](https://img.shields.io/badge/version-1.0.5-blue)
+![version](https://img.shields.io/badge/version-1.0.6-blue)
 # csv-results-persistence
 
 Microservicio Spring Boot/JDK 21 que consume los resultados parseados por `csv-results-parser` desde Kafka y los persiste en PostgreSQL.
