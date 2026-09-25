@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.2 - 2026-09-25
+## 1.0.3 - 2026-09-25
 
 - [patch] Exige confirmar rama y nivel SemVer antes de cualquier cambio.
 - [patch] Alinea Maven CI-friendly con revision, sha1 y changelist.
