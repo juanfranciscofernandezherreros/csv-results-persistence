@@ -1,4 +1,4 @@
-Current version: **1.0.3**
+Current version: **1.0.4**
 
 # csv-results-persistence
 

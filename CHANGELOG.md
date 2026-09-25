@@ -1,9 +1,9 @@
 # Changelog
 
-## 1.0.3 - 2026-09-25
+## 1.0.4 - 2026-09-25
 
-- [patch] Exige confirmar rama y nivel SemVer antes de cualquier cambio.
-- [patch] Alinea Maven CI-friendly con revision, sha1 y changelist.
+- [patch] Añade eliminación automática de la rama origen después de mergear una Pull Request en `main`.
+- [patch] Mantiene `main` como rama estable y no elimina ninguna otra rama.
 
 ## 1.0.1 - 2026-09-24
 
