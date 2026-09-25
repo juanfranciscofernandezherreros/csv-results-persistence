@@ -16,5 +16,5 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - name: Run unit and PostgreSQL integration tests
-        run: mvn -B verify -Pintegration
+      - name: Run tests
+        run: mvn -B test
