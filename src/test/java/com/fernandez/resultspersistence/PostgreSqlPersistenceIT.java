@@ -3,6 +3,7 @@ package com.fernandez.resultspersistence;
 import com.fernandez.results.avro.MatchResultValue;
 import com.fernandez.resultspersistence.repository.ResultRepository;
 import com.fernandez.resultspersistence.service.ResultPersistenceService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,11 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,19 +49,65 @@ class PostgreSqlPersistenceIT {
     @Autowired
     ResultRepository repository;
 
-    @Test
-    void flywayCreatesResultsTableAndServicePersistsIdempotently() {
-        MatchResultValue first = value("event-1", 90);
-        MatchResultValue replay = value("event-2", 91);
+    @BeforeEach
+    void cleanDatabase() {
+        repository.deleteAll();
+    }
 
-        service.persist(first);
-        service.persist(replay);
+    @Test
+    void redeliveryOfSameEventKeepsSingleRow() {
+        MatchResultValue event = value("event-1", 90);
+
+        service.persist(event);
+        service.persist(event);
 
         assertEquals(1, repository.count());
-        var saved = repository.findById("m1");
-        assertTrue(saved.isPresent());
-        assertEquals("event-2", saved.orElseThrow().getSourceEventId());
-        assertEquals(91, saved.orElseThrow().getHomeScore());
+        var saved = repository.findById("m1").orElseThrow();
+        assertEquals("event-1", saved.getSourceEventId());
+        assertEquals(90, saved.getHomeScore());
+    }
+
+    @Test
+    void reimportUpdatesCurrentStateAndTracksLatestSourceEvent() {
+        service.persist(value("event-1", 90));
+        service.persist(value("event-2", 91));
+
+        assertEquals(1, repository.count());
+        var saved = repository.findById("m1").orElseThrow();
+        assertEquals("event-2", saved.getSourceEventId());
+        assertEquals(91, saved.getHomeScore());
+    }
+
+    @Test
+    void concurrentRedeliveryKeepsSingleDeterministicState() throws Exception {
+        MatchResultValue event = value("event-concurrent", 92);
+        CountDownLatch start = new CountDownLatch(1);
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            Future<?> first = executor.submit(() -> persistAfter(start, event));
+            Future<?> second = executor.submit(() -> persistAfter(start, event));
+
+            start.countDown();
+            first.get();
+            second.get();
+
+            assertEquals(1, repository.count());
+            var saved = repository.findById("m1").orElseThrow();
+            assertEquals("event-concurrent", saved.getSourceEventId());
+            assertEquals(92, saved.getHomeScore());
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    private void persistAfter(CountDownLatch start, MatchResultValue event) {
+        try {
+            start.await();
+            service.persist(event);
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(interrupted);
+        }
     }
 
     private MatchResultValue value(String eventId, int homeScore) {

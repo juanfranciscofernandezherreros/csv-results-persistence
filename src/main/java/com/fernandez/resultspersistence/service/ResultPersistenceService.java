@@ -2,7 +2,7 @@ package com.fernandez.resultspersistence.service;
 
 import com.fernandez.results.avro.MatchResultValue;
 import com.fernandez.resultspersistence.mapper.ResultMapper;
-import com.fernandez.resultspersistence.repository.ResultRepository;
+import com.fernandez.resultspersistence.repository.ResultUpsertRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,15 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class ResultPersistenceService {
 
     private final ResultMapper mapper;
-    private final ResultRepository repository;
+    private final ResultUpsertRepository upsertRepository;
 
-    public ResultPersistenceService(ResultMapper mapper, ResultRepository repository) {
+    public ResultPersistenceService(ResultMapper mapper, ResultUpsertRepository upsertRepository) {
         this.mapper = mapper;
-        this.repository = repository;
+        this.upsertRepository = upsertRepository;
     }
 
     @Transactional
     public void persist(MatchResultValue value) {
-        repository.save(mapper.toEntity(value));
+        upsertRepository.upsert(mapper.toEntity(value));
     }
 }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0 - 2026-09-26
+
+- [minor] KAN-35 define `match_id` como clave de negocio para la idempotencia de RESULTS.
+- [minor] Sustituye la semántica implícita de `JpaRepository.save()` por un upsert PostgreSQL atómico con `ON CONFLICT (match_id) DO UPDATE`.
+- [minor] Usa `source_event_id` como trazabilidad de la última reimportación que produjo el estado vigente.
+- [minor] Añade tests de integración para redelivery, reimportación y redelivery concurrente.
+
 ## 1.1.1 - 2026-09-26
 
 - [patch] KAN-103 captura errores de deserialización Avro mediante `ErrorHandlingDeserializer`.
