@@ -1,4 +1,4 @@
-![version](https://img.shields.io/badge/version-1.1.0-blue)
+![version](https://img.shields.io/badge/version-1.1.1-blue)
 # csv-results-persistence
 
 Microservicio Spring Boot/JDK 21 que consume los resultados parseados por `csv-results-parser` desde Kafka y los persiste en PostgreSQL.
@@ -91,3 +91,8 @@ Ver [docs/diagrams.md](docs/diagrams.md).
 
 
 Las ramas de pull requests mergeadas se eliminan automáticamente para mantener `main` como rama estable.
+
+
+## Recuperación de deserialización Kafka
+
+Los deserializadores Avro están envueltos con `ErrorHandlingDeserializer`, por lo que un payload corrupto o incompatible entra en el flujo normal de recuperación. La DLT `results.parsed.DLT` acepta tanto objetos Avro como `byte[]` originales, conserva los headers de diagnóstico, deja que Kafka seleccione una partición válida y hace visible cualquier fallo de publicación en la propia DLT.
