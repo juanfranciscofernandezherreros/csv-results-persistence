@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 - 2026-09-26
+
+- [minor] KAN-103 aplica la estrategia común de errores Kafka de KAN-18.
+- [minor] Clasifica errores de datos/integridad como non-retryable y fallos transitorios de base de datos como retryable.
+- [minor] Configura retries/backoff y publica los mensajes agotados en `results.parsed.DLT` con contexto de error de Spring Kafka.
+- [minor] Añade tests de clasificación para error permanente y fallo transitorio.
+
+
 ## 1.0.6 - 2026-09-25
 
 - [patch] Refuerza AGENTS.md con lectura obligatoria por tarea, autonomía y prohibición absoluta de escrituras directas en main.
