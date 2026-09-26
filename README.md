@@ -1,4 +1,4 @@
-![version](https://img.shields.io/badge/version-1.0.6-blue)
+![version](https://img.shields.io/badge/version-1.1.0-blue)
 # csv-results-persistence
 
 Microservicio Spring Boot/JDK 21 que consume los resultados parseados por `csv-results-parser` desde Kafka y los persiste en PostgreSQL.
@@ -45,6 +45,9 @@ También se crea un índice por `(country, competition)`.
 | `KAFKA_CONSUMER_GROUP_ID` | grupo consumidor | `csv-results-persistence` |
 | `KAFKA_AUTO_OFFSET_RESET` | offset inicial | `earliest` |
 | `KAFKA_PARSED_RESULTS_TOPIC` | topic consumido | `results.parsed` |
+| `KAFKA_RESULTS_PERSISTENCE_DLT_TOPIC` | topic para mensajes agotados | `results.parsed.DLT` |
+| `KAFKA_RETRY_MAX_ATTEMPTS` | intentos totales antes de DLT | `3` |
+| `KAFKA_RETRY_BACKOFF_MS` | espera fija entre reintentos | `1000` |
 
 ## Desarrollo
 
@@ -80,7 +83,7 @@ docker run --rm --name csv-results-persistence \
   csv-results-persistence
 ```
 
-El offset Kafka solo se confirma normalmente después de que el listener termine. Si la persistencia falla, el listener lanza la excepción y el mensaje puede ser reintentado; la clave primaria `match_id` mantiene la operación idempotente frente a reentregas.
+Los errores de datos e integridad se consideran permanentes y se envían a DLT sin consumir retries inútiles. Los fallos transitorios de acceso a PostgreSQL se reintentan con backoff configurable; si se agotan los intentos, el registro original se publica en `results.parsed.DLT` conservando los headers de diagnóstico añadidos por Spring Kafka.
 
 ## Arquitectura
 
