@@ -1,4 +1,4 @@
-![version](https://img.shields.io/badge/version-1.1.1-blue)
+![version](https://img.shields.io/badge/version-1.2.0-blue)
 # csv-results-persistence
 
 Microservicio Spring Boot/JDK 21 que consume los resultados parseados por `csv-results-parser` desde Kafka y los persiste en PostgreSQL.
@@ -10,15 +10,29 @@ csv-results-parser
   -> Kafka topic: results.parsed
   -> ParsedResultConsumer
   -> ResultPersistenceService
-  -> ResultRepository / JPA
+  -> ResultUpsertRepository
   -> PostgreSQL: results
 ```
 
 El consumidor usa exactamente el contrato Avro `MatchResultKey` / `MatchResultValue` producido por el parser.
 
+## Política de idempotencia
+
+La identidad de negocio de RESULTS es `match_id`. PostgreSQL la protege con la primary key de `results`.
+
+La escritura usa una única operación atómica `INSERT ... ON CONFLICT (match_id) DO UPDATE`:
+
+- un redelivery del mismo evento mantiene una única fila;
+- una reimportación del mismo partido actualiza el estado materializado actual;
+- `source_event_id` conserva la trazabilidad de la importación que produjo la versión vigente;
+- no existe una ventana `read-then-write` entre comprobar existencia y guardar;
+- redeliveries concurrentes del mismo evento convergen en el mismo estado.
+
+La política de RESULTS es, por tanto, **current-state upsert**: `match_id` identifica el agregado y la última escritura confirmada para ese partido representa su estado actual. El servicio no mantiene histórico de versiones en esta tabla.
+
 ## Tabla PostgreSQL
 
-Flyway crea la tabla `results`. La clave primaria es `match_id`, por lo que una reentrega de Kafka o un reprocesado del mismo partido actualiza la fila existente en lugar de crear duplicados.
+Flyway crea la tabla `results`. La clave primaria es `match_id`, que respalda directamente la política de idempotencia y el `ON CONFLICT`.
 
 Campos principales:
 
@@ -57,7 +71,7 @@ Suite rápida sin Docker:
 mvn -B test
 ```
 
-Suite completa con PostgreSQL real mediante Testcontainers:
+Suite completa con PostgreSQL real mediante Testcontainers, incluyendo redelivery, reimportación y concurrencia:
 
 ```bash
 mvn -B verify -Pintegration
@@ -89,9 +103,7 @@ Los errores de datos e integridad se consideran permanentes y se envían a DLT s
 
 Ver [docs/diagrams.md](docs/diagrams.md).
 
-
 Las ramas de pull requests mergeadas se eliminan automáticamente para mantener `main` como rama estable.
-
 
 ## Recuperación de deserialización Kafka
 
